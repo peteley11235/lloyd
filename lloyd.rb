@@ -31,7 +31,6 @@ lloyd = Cinch::Bot.new do
     c.server = "im.bitlbee.org"
     c.nick = "#{user}"
 
-    c.user = "#{user}"
     c.realname = "Lloyd Arisassistant"
 
     c.plugins.plugins = [
