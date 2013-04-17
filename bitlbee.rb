@@ -12,7 +12,7 @@ class Bitlbee
   def initialize(*args)
     super
     
-    f = File.open("./password","r")
+    f = File.open("#{$dir}/password","r")
     @pass = f.gets
     f.close
   end

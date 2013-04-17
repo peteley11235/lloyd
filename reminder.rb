@@ -23,7 +23,7 @@ class Reminder
     
     # Use a simple flat file to store reminders
     # in case of a shutdown. 
-    @reminderfile = "./reminders"
+    @reminderfile = "#{$dir}/reminders"
     
     read_reminders
 

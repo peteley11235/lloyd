@@ -17,9 +17,12 @@ require './bitlbee.rb'
 require './reminder.rb'
 require './decision.rb'
 
+# directory to store databases and files
+$dir = ENV['HOME']+'/.lloyd'
+
 lloyd = Cinch::Bot.new do
 
-  f = File.open("./user","r")
+  f = File.open("#{$dir}/user","r")
   user = f.gets
   f.close
 
