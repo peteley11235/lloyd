@@ -14,7 +14,7 @@ class Track
   def initialize(*args)
     super
 
-    @db = SQLite3::Database.open 'track.db'
+    @db = SQLite3::Database.open("#{$dir}/track.db")
     @db.results_as_hash = true
 
     # Keep track of canfield winnings
