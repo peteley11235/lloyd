@@ -16,6 +16,7 @@ require 'cinch'
 require './bitlbee.rb'
 require './reminder.rb'
 require './decision.rb'
+require './track.rb'
 
 # directory to store databases and files
 $dir = ENV['HOME']+'/.lloyd'
@@ -36,7 +37,8 @@ lloyd = Cinch::Bot.new do
     c.plugins.plugins = [
                          Bitlbee,
                          Reminder,
-                         Decision
+                         Decision,
+                         Track
                         ]
     c.plugins.prefix = ""
   end
