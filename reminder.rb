@@ -66,8 +66,8 @@ class Reminder
   end
 
   # Reminder logic
-  match /remind me (o|d|w|m|y)?.*?\b (.+) (in|at) (.+)/i, :method => :add_reminder
-  def add_reminder(m,repeat,msg,inat,timestr)
+  match /remind me (.+)/i, :method => :add_reminder
+  def add_reminder(m,str)
     # remove some phrases out of the msg
     # e.g. "to pay bills" gives a "pay bills"
     # message
@@ -78,33 +78,6 @@ class Reminder
             /^that /
            ]
     subs.each { |s| msg.sub!(s,"") }
-
-    # calculate time and repeat interval
-    case repeat
-    when "o"
-      r_int = 0
-      case inat 
-      when "at" 
-        time = Chronic::parse(timestr).to_i
-      when "in"
-        time = Time.now.to_i + ChronicDuration::parse(timestr)
-      else
-        m.reply("usage: remind me <once/daily/weekly/monthly/yearly> <text> <in/at> <time>")
-        return 0
-      end
-    when /[dwmy]/
-      # otherwise, ChronicDuration will assume 'minute'
-      repeat = "month" if repeat == "m"
-      r_int = ChronicDuration::parse(repeat)
-      case inat
-      when "at"
-        time = Chronic::parse(timestr).to_i
-      when "in"
-        time = Time.now.to_i + ChronicDuration::parse(timestr)
-      else
-        m.reply("usage: remind me <once/daily/weekly/monthly/yearly> <text> <in/at> <time>")
-      end
-    end
 
     r = ReminderStruct.new(m.user.nick,time,msg,r_int)
     write_reminder(r)
