@@ -19,6 +19,4 @@ doc/
 
 # POST github-generated stuff
 *~
-reminders
-user
-password
+*.db
