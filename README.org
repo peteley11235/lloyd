@@ -1,0 +1,99 @@
+* Lloyd
+  Lloyd is my personal assistant; he remembers things for me. 
+
+  He sits on AIM through IRC using the Bitlbee gateway
+  (irc://im.bitlbee.org) so I can communicate with him for free via
+  SMS. Lloyd is written in Ruby using the Cinch IRC bot framework
+  (https://github.com/cinchrb/cinch). Each thing he can do is
+  encapsulated in a Cinch plugin.
+
+** License
+   Copyright (c) 2013 Peter Ley
+
+   Permission is hereby granted, free of charge, to any person
+   obtaining a copy of this software and associated documentation
+   files (the "Software"), to deal in the Software without
+   restriction, including without limitation the rights to use,
+   copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the
+   Software is furnished to do so, subject to the following
+   conditions:
+
+   The above copyright notice and this permission notice shall be
+   included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+** Plugins
+*** Bitlbee
+    This plugin just logs the bot into im.bitlbee.org.
+*** Reminders
+    This plugin is in the process of being mostly rewritten, but
+    here's how it works right now.
+
+    Lloyd can be used (albeit somewhat unreliably) to set reminders
+    that come through over text message. This is the idea that
+    sparked this whole project, which is a bit disappointing since
+    the SMS gateway isn't all that reliable, and you can't depend on
+    getting the texts. If it worked better, I at least would prefer
+    this method over others (e.g. specialized apps) because I
+    already use my phone mostly for texting and using texts for
+    reminders would cut down on the amount of screen switching. 
+
+**** Syntax
+     Remind me <repeat> <reminder text> <in/at> <time>
+
+     Repeat (for now) is one of 
+
+     - once
+     - daily
+     - weekly
+     - monthly
+     - yearly
+
+     which can be shortened to their initial letter.
+
+     The reminder text is what will be sent to you in the message,
+     with leading words like 'to', 'about', 'that' stripped out. 
+
+     At the end is a time which, being interpreted by Chronic
+     (https://github.com/mojombo/chronic) or Chronic Duration
+     (https://github.com/hpoydar/chronic_duration) can be written in
+     natural language. 
+
+     The reminder text should be followed by either 'in' or 'at'
+     which will change how the time following it is
+     interpreted. When 'in', the time will be interpreted as a
+     duration after which the reminder will be sent. When 'at', it
+     will be interpreted as an absolute time. 
+
+*** Decision
+    Have a tough decision to make? Throw caution to the wind and let
+    Lloyd make it for you. Simple dilemmas can be solved with a
+    simple coin flip ('coin' command) and decisions with more
+    choices can be made with the 'decide' command.
+
+**** Syntax
+     Coin - Lloyd returns either "Heads" or "Tails"
+
+     Decide <options separated by ',' or 'or'> - Lloyd chooses at
+     random and returns one of your options
+
+     e.g. "Decide write more code, watch Breaking Bad, or rob a
+     bank"
+
+*** Track
+    The track plugin allows me to keep track of various
+    data. Eventually, the plan is to make it dynamic so you can add
+    new data sets on the fly, but for now the things I want to track
+    are hardcoded.
+
+    So far, all that's done is the ability to record the data into a
+    SQLite database. In the future, I plan to add a custom analytics
+    engine that generates graphs and sends a link to the images. 
