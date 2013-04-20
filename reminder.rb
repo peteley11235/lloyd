@@ -5,6 +5,8 @@
 # Lloyd reminders plugin. When I tell him something like "remind me
 # once to feed the dog in 10 minutes" he does so.
 
+# TODO Rewrite file logic for recurring reminders
+
 require 'cinch'
 require 'chronic'
 require 'chronic_duration'
@@ -66,8 +68,9 @@ class Reminder
   end
 
   # Reminder logic
-  match /remind me (.+)/i, :method => :add_reminder
-  def add_reminder(m,str)
+  match /remind me (.+) (in .+)/i, :method => :add_reminder
+  match /remind me (.+) (at .+)/i, :method => :add_reminder
+  def add_reminder(m,reminder,time)
     # remove some phrases out of the msg
     # e.g. "to pay bills" gives a "pay bills"
     # message
@@ -77,9 +80,19 @@ class Reminder
             /^about /,
             /^that /
            ]
-    subs.each { |s| msg.sub!(s,"") }
+    subs.each { |s| reminder.sub!(s,"") }
 
-    r = ReminderStruct.new(m.user.nick,time,msg,r_int)
+    # Convert the time into an epoch time string
+    if time.match(/^in/) 
+      time = Time.now.to_i + ChronicDuration.parse(time.sub(/in /,""))
+    elsif time.match(/^at/)
+      time = Chronic.parse(time.sub(/at /,""))
+    end
+
+    # temporary
+    r_int = 0
+
+    r = ReminderStruct.new(m.user.nick,time,reminder,r_int)
     write_reminder(r)
     remind(r)
   end
