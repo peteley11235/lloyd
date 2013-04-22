@@ -5,8 +5,6 @@
 # Lloyd reminders plugin. When I tell him something like "remind me
 # once to feed the dog in 10 minutes" he does so.
 
-# TODO Rewrite file logic for recurring reminders
-
 require 'cinch'
 require 'chronic'
 require 'chronic_duration'
@@ -67,13 +65,14 @@ class Reminder
     end
   end
 
-  # Reminder logic
-  match /remind me (.+) (in .+)/i, :method => :add_reminder
-  match /remind me (.+) (at .+)/i, :method => :add_reminder
-  def add_reminder(m,reminder,time)
+  # The important bit
+  # TODO try to make "remind me to put in the dvd in 5 minutes" work
+  match /remind me (.+) (in|at) (?>(.+) (?>every (.+))|(.+))/i, :method => :add_reminder
+  def add_reminder(m,reminder,*args)
     # remove some phrases out of the msg
     # e.g. "to pay bills" gives a "pay bills"
     # message
+    # TODO redo this
     subs = [ 
             /^to /,
             /^of /,
@@ -81,16 +80,33 @@ class Reminder
             /^that /
            ]
     subs.each { |s| reminder.sub!(s,"") }
+    
+    # The atomic (?>) group in the regex 
+    # returns nil, and must be removed
+    args.reject! { |a| a.nil? }
 
-    # Convert the time into an epoch time string
-    if time.match(/^in/) 
-      time = Time.now.to_i + ChronicDuration.parse(time.sub(/in /,""))
-    elsif time.match(/^at/)
-      time = Chronic.parse(time.sub(/at /,""))
+    # reverse the array so you can pop the
+    # elements off in order
+    args.reverse!
+
+    # Time calculation
+    inat = args.pop
+    timestr = args.pop
+
+    if inat == "at"
+      time = Chronic.parse(timestr)
+    else
+      time = Time.now.to_i + ChronicDuration.parse(timestr)
     end
 
-    # temporary
-    r_int = 0
+    # Repeat interval calculation
+    repeat = args.pop
+
+    if repeat
+      r_int = ChronicDuration.parse(repeat)
+    else
+      r_int = 0
+    end
 
     r = ReminderStruct.new(m.user.nick,time,reminder,r_int)
     write_reminder(r)
