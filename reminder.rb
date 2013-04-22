@@ -83,48 +83,50 @@ class Reminder
     end
   end
 
-  # Reminder logic
-  match /remind me (o|d|w|m|y)?.*?\b (.+) (in|at) (.+)/i, :method => :add_reminder
-  def add_reminder(m,repeat,msg,inat,timestr)
+  # The important bit
+  # TODO try to make "remind me to put in the dvd in 5 minutes" work
+  match /remind me (.+) (in|at) (?>(.+) (?>every (.+))|(.+))/i, :method => :add_reminder
+  def add_reminder(m,reminder,*args)
     # remove some phrases out of the msg
     # e.g. "to pay bills" gives a "pay bills"
     # message
+    # TODO redo this
     subs = [ 
             /^to /,
             /^of /,
             /^about /,
             /^that /
            ]
-    subs.each { |s| msg.sub!(s,"") }
+    subs.each { |s| reminder.sub!(s,"") }
+    
+    # The atomic (?>) group in the regex 
+    # returns nil, and must be removed
+    args.reject! { |a| a.nil? }
 
-    # calculate time and repeat interval
-    case repeat
-    when "o"
-      r_int = 0
-      case inat 
-      when "at" 
-        time = Chronic::parse(timestr).to_i
-      when "in"
-        time = Time.now.to_i + ChronicDuration::parse(timestr)
-      else
-        m.reply("usage: remind me <once/daily/weekly/monthly/yearly> <text> <in/at> <time>")
-        return 0
-      end
-    when /[dwmy]/
-      # otherwise, ChronicDuration will assume 'minute'
-      repeat = "month" if repeat == "m"
-      r_int = ChronicDuration::parse(repeat)
-      case inat
-      when "at"
-        time = Chronic::parse(timestr).to_i
-      when "in"
-        time = Time.now.to_i + ChronicDuration::parse(timestr)
-      else
-        m.reply("usage: remind me <once/daily/weekly/monthly/yearly> <text> <in/at> <time>")
-      end
+    # reverse the array so you can pop the
+    # elements off in order
+    args.reverse!
+
+    # Time calculation
+    inat = args.pop
+    timestr = args.pop
+
+    if inat == "at"
+      time = Chronic.parse(timestr)
+    else
+      time = Time.now.to_i + ChronicDuration.parse(timestr)
     end
 
-    r = ReminderStruct.new(m.user.nick,time,msg,r_int)
+    # Repeat interval calculation
+    repeat = args.pop
+
+    if repeat
+      r_int = ChronicDuration.parse(repeat)
+    else
+      r_int = 0
+    end
+
+    r = ReminderStruct.new(m.user.nick,time,reminder,r_int)
     write_reminder(r)
     remind(r)
   end
