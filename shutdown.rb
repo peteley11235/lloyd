@@ -1,5 +1,3 @@
-#!/usr/bin/ruby1.9.1
-
 # Copyright (c) 2013 Peter Ley 
 
 # Permission is hereby granted, free of charge, to any person
@@ -22,45 +20,18 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Lloyd is my personal assistant. He is an IRC bot using the Cinch
-# bot framework. He sits on Bitlbee, an IRC gateway to chat
-# services like AIM. He has his own account on the im.bitlbee.org
-# IRC network and AIM screenname which he uses for the free AIM SMS
-# gateway. I communicate with him via text message. 
+# Make Lloyd shutdown-safe. Never considered the VPS getting shut down. 
 
-require 'cinch'
+class ShutdownSafety
+  include Cinch::Plugin
 
-# plugins
-require './bitlbee.rb'
-require './reminder.rb'
-require './decision.rb'
-require './track.rb'
-require './shutdown.rb'
+  def initialize(*args)
+    super
 
-# directory to store databases and files
-$dir = ENV['HOME']+'/.lloyd'
-
-lloyd = Cinch::Bot.new do
-
-  f = File.open("#{$dir}/user","r")
-  user = f.gets
-  f.close
-
-  configure do |c|
-    c.server = "im.bitlbee.org"
-    c.nick = "#{user}"
-
-    c.realname = "Lloyd Arisassistant"
-
-    c.plugins.plugins = [
-                         Bitlbee,
-                         Reminder,
-                         Decision,
-                         Track,
-                         ShutdownSafety
-                        ]
-    c.plugins.prefix = ""
+    f = File.open("#{$dir}/notify","r")
+    user = f.gets
+    f.close
+    
+    Signal.trap("TERM") { User("#{user}").msg("Halp!") }
   end
 end
-
-lloyd.start
