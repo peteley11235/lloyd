@@ -66,7 +66,6 @@ class Reminder
   end
 
   # The important bit
-  # TODO try to make "remind me to put in the dvd in 5 minutes" work
   match /remind me (.+) (in|at) (?>(.+) (?>every (.+))|(.+))/i, :method => :add_reminder
   def add_reminder(m,reminder,*args)
     # remove some phrases out of the msg
