@@ -112,7 +112,6 @@ class Reminder
     # Feedback
     m.reply("Okay, I'll remind you at #{Time.at(time)}")
 
-    write_reminder(r)
     remind(r)
   end
 
@@ -123,7 +122,14 @@ class Reminder
   # one as it ends. Kinda clever if you ask me.
   def remind(r)
     send_message = lambda {
+      # Send the message
       User(r.who).msg("#{r.msg}")
+      
+      # Update the absolute time and save 
+      # the new Reminder Struct to the file
+      r.time = Time.now.to_i + r.r_int.to_i
+      write_reminder(r)
+      
       Timer(r.r_int.to_i, :shots => 1, &send_message) unless r.r_int.to_i == 0
     }
 
