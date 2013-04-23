@@ -20,3 +20,4 @@ doc/
 # POST github-generated stuff
 *~
 *.db
+bugs
