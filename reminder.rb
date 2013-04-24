@@ -28,9 +28,9 @@ require 'chronic'
 require 'chronic_duration'
 
 class Reminder
-  class ReminderStruct < Struct.new(:who, :time, :msg, :r_int)
+  class ReminderStruct < Struct.new(:who,:time,:msg,:r_int,:stopat)
     def to_s
-      "#{who},#{time},#{msg},#{r_int}\n"
+      "#{who},#{time},#{msg},#{r_int},#{stopat}\n"
     end
   end
   
@@ -45,19 +45,45 @@ class Reminder
     
     read_reminders
 
-    # Remove old reminders every half hour
+    # Remove old reminders every half hour (also called in
+    # read_reminders)
     Timer(30*60) { clean_reminder_file }
   end
   
   # read the reminders from the file
   def read_reminders
+
+    # Keep track of the reminders that will be kept
+    kept_reminders = []
+
     synchronize(:reminderfile) do
       File.open(@reminderfile,"r").each do |line| 
-        (w,t,m,r) = line.split(",")
-        # discard reminders whose times have passed
-        remind(ReminderStruct.new(w,t,m,r)) if t.to_i > Time.now.to_i
+        w,t,m,r,s = line.split(",")
+
+        # Hack! 
+        s = nil if s == "\n"
+
+        # Update recurring reminders which have passed and either are
+        # infinite (stopat=nil) or are still in their recur interval
+        # (stopat in the future)
+        if (t.to_i < Time.now.to_i) &&
+            (r.to_i > 0) && 
+            (s.nil? || (s.to_i > Time.now.to_i))
+          time = t.to_i
+          time += r.to_i until time > Time.now.to_i 
+          t = time
+          kept_reminders.push(ReminderStruct.new(w,t,m,r,s))
+        end
+
+        remind(ReminderStruct.new(w,t,m,r,s)) if t.to_i > Time.now.to_i
       end
     end
+    
+    clean_reminder_file
+
+    # Have to do this outside 'synchronize' because 'write_reminder'
+    # calls 'synchronize' and causes deadlock
+    kept_reminders.each { |r| write_reminder(r) }
   end
 
   # write a single reminder to the file
@@ -84,13 +110,11 @@ class Reminder
   end
 
   # The important bit
-  # TODO try to make "remind me to put in the dvd in 5 minutes" work
   match /remind me (.+) (in|at) (?>(.+) (?>every (.+))|(.+))/i, :method => :add_reminder
   def add_reminder(m,reminder,*args)
     # remove some phrases out of the msg
     # e.g. "to pay bills" gives a "pay bills"
     # message
-    # TODO redo this
     subs = [ 
             /^to /,
             /^of /,
@@ -112,7 +136,7 @@ class Reminder
     timestr = args.pop
 
     if inat == "at"
-      time = Chronic.parse(timestr)
+      time = Chronic.parse(timestr).to_i
     else
       time = Time.now.to_i + ChronicDuration.parse(timestr)
     end
@@ -121,27 +145,61 @@ class Reminder
     repeat = args.pop
 
     if repeat
+      # Allow recurring reminders to be given
+      # a set interval or time to stop
+      if repeat.match(/(until|for)/)
+        endtype = repeat.match(/(until|for)/)[0]
+        repeat,endclause = repeat.split(" #{endtype} ")
+        
+        if endtype == "until"
+          stopat = Chronic.parse(endclause).to_i
+        elsif endtype == "for"
+          stopat = time + ChronicDuration.parse(endclause)
+        end
+      else
+        stopat = nil
+      end
       r_int = ChronicDuration.parse(repeat)
     else
       r_int = 0
+      stopat = nil
     end
 
-    r = ReminderStruct.new(m.user.nick,time,reminder,r_int)
+    r = ReminderStruct.new(m.user.nick,time,reminder,r_int,stopat)
+
+    # Feedback
+    m.reply("Okay, I'll remind you at #{Time.at(time)}")
+
     write_reminder(r)
     remind(r)
   end
 
-  # Set up the once/recurring reminder timer for a given struct. I
-  # could use 0 shots for infinite repeats, but that only works if the
-  # interval between now and the time is the same as the repeat
-  # interval. This way, each timer is a one-off that sets up another
-  # one as it ends. Kinda clever if you ask me.
+  # This sets up the timer for the interval between 
+  # now and the time of the reminder (or the first
+  # in a series of recurring reminders)
   def remind(r)
-    send_message = lambda {
-      User(r.who).msg("#{r.msg}")
-      Timer(r.r_int.to_i, :shots => 1, &send_message) unless r.r_int.to_i == 0
-    }
+    Timer(r.time.to_i-Time.now.to_i, :shots => 1) { remind_iter(r) }
+  end
+      
+  # This takes care of recurring reminders, both
+  # infinitely recurring and those with a set
+  # stop time
+  def remind_iter(r)
+    # Send first message
+    User(r.who).msg(r.msg)
 
-    Timer(r.time.to_i-Time.now.to_i, :shots => 1, &send_message)
+    # Set up recurring timers
+    if r.r_int.to_i > 0
+
+      # Infinitely recurring
+      if r.stopat.nil?
+        Timer(r.r_int.to_i) { User(r.who).msg(r.msg) }
+
+      # Recurring over a set interval
+      else
+        shots = ((r.stopat.to_i-Time.now.to_i) / r.r_int.to_i) - 1
+        Timer(r.r_int.to_i, :shots => shots) { User(r.who).msg(r.msg) }
+      end
+    end
   end
 end
