@@ -47,32 +47,21 @@
     reminders would cut down on the amount of screen switching. 
 
 **** Syntax
-     Remind me <repeat> <reminder text> <in/at> <time>
+     Remind me <message> <in/at> <time> [<every> <time> [<for/until> <time>]]
 
-     Repeat (for now) is one of 
+     The basic usage is to set a reminder for a time relative to the
+     current time ('in') or an absolute time ('at'). Depending on
+     which is used, the time will be parsed by either Chronic or
+     ChronicDuration, both of which are natural language time/date
+     parsers. 
 
-     - once
-     - daily
-     - weekly
-     - monthly
-     - yearly
-
-     which can be shortened to their initial letter.
-
-     The reminder text is what will be sent to you in the message,
-     with leading words like 'to', 'about', 'that' stripped out. 
-
-     At the end is a time which, being interpreted by Chronic
-     (https://github.com/mojombo/chronic) or Chronic Duration
-     (https://github.com/hpoydar/chronic_duration) can be written in
-     natural language. 
-
-     The reminder text should be followed by either 'in' or 'at'
-     which will change how the time following it is
-     interpreted. When 'in', the time will be interpreted as a
-     duration after which the reminder will be sent. When 'at', it
-     will be interpreted as an absolute time. 
-
+     If an 'every' clause is included, the reminder can recur over a
+     set interval. By itself, this causes an infinitely-recurring
+     reminder (with the ability to delete them coming in a future
+     update!). If a 'until' or 'for' clause is included, the recurring
+     reminder stops at the given time or after the given interval,
+     respectively. These times are also parsed by Chronic and
+     ChronicDuration. 
 *** Decision
     Have a tough decision to make? Throw caution to the wind and let
     Lloyd make it for you. Simple dilemmas can be solved with a
