@@ -29,6 +29,7 @@
 # gateway. I communicate with him via text message. 
 
 require 'cinch'
+require 'daemons'
 
 # plugins
 require './bitlbee.rb'
@@ -61,4 +62,6 @@ lloyd = Cinch::Bot.new do
   end
 end
 
-lloyd.start
+Daemons.run_proc('lloyd') do
+  lloyd.start
+end
