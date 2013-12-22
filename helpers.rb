@@ -20,27 +20,11 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Makes decisions for you.
+# --------------------------------------------------------------------
 
-require 'cinch'
-
-# for delayed_reply
-require './helpers.rb'
-
-class Decision
-  include Cinch::Plugin
-
-  # Simple coin flip
-  match /coin/i, :method => :coin
-  def coin(m)
-    delayed_reply(m,rand(2) == 0 ? "Heads" : "Tails")
-  end
-
-  # Decide from a list of choices separated by "or" 
-  # (Got the idea from #nethack bot Rodney's !rng)
-  match /decide (.+)/i, :method => :decide
-  def decide(m,str)
-    choices = str.split(/, | or /)
-    delayed_reply(m,choices[rand(choices.size)])
-  end
+# I suspect some of my messages get dropped because the oscar protocol
+# or server doesn't like how quickly lloyd replies. I'll even randomize 
+# the delay a bit so it seems more human
+def delayed_reply(m,string)
+  Timer(3+rand(3),:shots => 1) { m.reply(string) } 
 end

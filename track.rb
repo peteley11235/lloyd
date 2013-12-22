@@ -26,6 +26,9 @@
 require 'cinch'
 require 'sqlite3'
 
+# for delayed_reply
+require './helpers.rb'
+
 class Track
   include Cinch::Plugin
 
@@ -56,12 +59,12 @@ class Track
       @db.execute "INSERT INTO Canfield (Time,Money) VALUES (#{time},#{money})"
       @canfield_winnings += money
     end
-    m.reply("Added. Balance: $#{@canfield_winnings}")
+    delayed_reply(m,"Added. Balance: $#{@canfield_winnings}")
   end
 
   match /canfield bal/i, :method => :canfield_balance
   def canfield_balance(m)
-    m.reply("Your winnings so far: $#{@canfield_winnings}")
+    delayed_reply(m,"Your winnings so far: $#{@canfield_winnings}")
   end
 
   # Water drinking
@@ -71,7 +74,7 @@ class Track
     synchronize(:track) do
       @db.execute "INSERT INTO Water (Time,Cups) VALUES (#{time},#{cups})"
     end
-    m.reply("Added.")
+    delayed_reply(m,"Added.")
   end
 
   # Rounds
@@ -81,6 +84,6 @@ class Track
     synchronize(:track) do
       @db.execute "INSERT INTO Rounds (Time,Name) VALUES (#{time},'#{name}')"
     end
-    m.reply("Added.")
+    delayed_reply(m,"Added.")
   end
 end
