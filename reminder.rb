@@ -168,8 +168,8 @@ class Reminder
     r = ReminderStruct.new(m.user.nick,time,reminder,r_int,stopat)
 
     # Feedback
-    m.reply("Okay, I'll remind you at #{Time.at(time)}")
-
+    #m.reply("Okay, I'll remind you at #{Time.at(time)}")
+    
     write_reminder(r)
     remind(r)
   end
