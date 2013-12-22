@@ -56,7 +56,7 @@ class Track
     # In this case, time != money
     time = Time.now.to_i
     synchronize(:track) do
-      @db.execute "INSERT INTO Canfield (Time,Money) VALUES (#{time},#{money})"
+      @db.execute "INSERT INTO Canfield (Time,Money,Cards) VALUES (#{time},#{money},#{cards})"
       @canfield_winnings += money
     end
     delayed_reply(m,"Added. Balance: $#{@canfield_winnings}")
