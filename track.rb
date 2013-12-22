@@ -66,24 +66,4 @@ class Track
   def canfield_balance(m)
     delayed_reply(m,"Your winnings so far: $#{@canfield_winnings}")
   end
-
-  # Water drinking
-  match /drank (\d+)/i, :method => :add_water
-  def add_water(m,cups)
-    time = Time.now.to_i
-    synchronize(:track) do
-      @db.execute "INSERT INTO Water (Time,Cups) VALUES (#{time},#{cups})"
-    end
-    delayed_reply(m,"Added.")
-  end
-
-  # Rounds
-  match /rounds (\w+)/i, :method => :rounds
-  def rounds(m,name)
-    time = Time.now.to_i
-    synchronize(:track) do
-      @db.execute "INSERT INTO Rounds (Time,Name) VALUES (#{time},'#{name}')"
-    end
-    delayed_reply(m,"Added.")
-  end
 end
