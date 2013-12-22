@@ -1,5 +1,3 @@
-#!/usr/bin/ruby1.9.1
-
 # Copyright (c) 2013 Peter Ley 
 
 # Permission is hereby granted, free of charge, to any person
@@ -29,7 +27,6 @@
 # gateway. I communicate with him via text message. 
 
 require 'cinch'
-require 'daemons'
 
 # plugins
 require './bitlbee.rb'
@@ -62,6 +59,4 @@ lloyd = Cinch::Bot.new do
   end
 end
 
-Daemons.run_proc('lloyd') do
-  lloyd.start
-end
+lloyd.start
