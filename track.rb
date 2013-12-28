@@ -68,7 +68,7 @@ class Track
   end
 
   # Go proverbs
-  match /rec proverb (.+)/i, :method => :rec_proverb
+  match /rec proverb (\'.+\')/i, :method => :rec_proverb
   def rec_proverb(m,proverb)
     synchronize(:track) do
       @db.execute "INSERT INTO Proverbs (Proverb) VALUES (#{proverb})"
@@ -79,7 +79,7 @@ class Track
   def show_proverb(m)
     synchronize(:track) do
       proverbs = @db.execute "SELECT * FROM Proverbs ORDER BY RANDOM() LIMIT 1"
-      delayed_reply(m,proverbs[0])
+      delayed_reply(m,proverbs[0]['Proverb'])
     end
   end
 end
