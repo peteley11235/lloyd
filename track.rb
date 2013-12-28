@@ -66,4 +66,20 @@ class Track
   def canfield_balance(m)
     delayed_reply(m,"Your winnings so far: $#{@canfield_winnings}")
   end
+
+  # Go proverbs
+  match /rec proverb (.+)/i, :method => :rec_proverb
+  def rec_proverb(m,proverb)
+    synchronize(:track) do
+      @db.execute "INSERT INTO Proverbs (Proverb) VALUES (#{proverb})"
+    end
+  end
+
+  match /proverb/i, :method => :show_proverb
+  def show_proverb(m)
+    synchronize(:track) do
+      proverbs = @db.execute "SELECT * FROM Proverbs ORDER BY RANDOM() LIMIT 1"
+      delayed_reply(m,proverbs[0])
+    end
+  end
 end
