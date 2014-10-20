@@ -84,9 +84,13 @@ class Track
   end
 
   ### Cycling
-  match /rode (\d+) (\d+) (\d+) (\d+)/i, :method => :add_ride
+  match /rode (\d+) (\d\d:\d\d:\d\d) (\d+) (\d+)/i, :method => :add_ride
   def add_ride(m,miles,time,elevation,power)
     datetime = Time.now.to_i;
+
+    # Turn time into an interval in seconds
+    h,m,s = time.split(':')
+    time = (h.to_i * 3600) + (m.to_i * 60) + s.to_i
     
     synchronize(:track) do
       @db.execute "INSERT INTO Cycling (Datetime,Miles,Time,Elevation_gain,Power) VALUES (#{datetime},#{miles},#{time},#{elevation},#{power})"
