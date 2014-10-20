@@ -45,7 +45,7 @@ class Track
     end
   end
 
-  # Canfield
+  ### Canfield
   match /canfield (\d+)/i, :method => :add_canfield
   def add_canfield(m,cards)
     cards = cards.to_i
@@ -67,7 +67,7 @@ class Track
     delayed_reply(m,"Your winnings so far: $#{@canfield_winnings}")
   end
 
-  # Go proverbs
+  ### Go proverbs
   match /rec proverb (\'.+\')/i, :method => :rec_proverb
   def rec_proverb(m,proverb)
     synchronize(:track) do
@@ -80,6 +80,16 @@ class Track
     synchronize(:track) do
       proverbs = @db.execute "SELECT * FROM Proverbs ORDER BY RANDOM() LIMIT 1"
       delayed_reply(m,proverbs[0]['Proverb'])
+    end
+  end
+
+  ### Cycling
+  match /rode (\d+) (\d+) (\d+) (\d+)/i, :method => :add_ride
+  def add_ride(m,miles,time,elevation,power)
+    datetime = Time.now.to_i;
+    
+    synchronize(:track) do
+      @db.execute "INSERT INTO Cycling (Datetime,Miles,Time,Elevation_gain,Power) VALUES (#{datetime},#{miles},#{time},#{elevation},#{power})"
     end
   end
 end
