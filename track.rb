@@ -25,6 +25,7 @@
 
 require 'cinch'
 require 'sqlite3'
+require 'chronic_duration'
 
 # for delayed_reply
 require './helpers.rb'
@@ -84,13 +85,12 @@ class Track
   end
 
   ### Cycling
-  match /rode (\d+) (\d\d:\d\d:\d\d) (\d+) (\d+)/i, :method => :add_ride
+  match /rode (\d+) (\d?\d?:?\d\d:\d\d) (\d+) (\d+)/i, :method => :add_ride
   def add_ride(m,miles,duration,elevation,power)
     datetime = Time.now.to_i;
 
     # Turn time into an interval in seconds
-    h,m,s = duration.split(':')
-    duration = (h.to_i * 3600) + (m.to_i * 60) + s.to_i
+    duration = ChronicDuration.parse(duration).to_i
     
     synchronize(:track) do
       @db.execute "INSERT INTO Cycling (Datetime,Miles,Duration,Elevation_gain,Power) VALUES (#{datetime},#{miles},#{duration},#{elevation},#{power})"
