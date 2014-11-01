@@ -95,5 +95,7 @@ class Track
     synchronize(:track) do
       @db.execute "INSERT INTO Cycling (Datetime,Miles,Duration,Elevation_gain,Power) VALUES (#{datetime},#{miles},#{duration},#{elevation},#{power})"
     end
+
+    delayed_reply(m,"Avg spd: #{(miles/duration)*3600} mph")
   end
 end
