@@ -85,7 +85,7 @@ class Track
   end
 
   ### Cycling
-  match /rode (\d+) (\d?\d?:?\d\d:\d\d) (\d+) (\d+)/i, :method => :add_ride
+  match /rode (\d+\.\d) (\d?\d?:?\d\d:\d\d) (\d+) (\d+)/i, :method => :add_ride
   def add_ride(m,miles,duration,elevation,power)
     datetime = Time.now.to_i;
 
