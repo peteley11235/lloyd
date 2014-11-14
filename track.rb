@@ -86,16 +86,16 @@ class Track
 
   ### Cycling
   match /rode (\d+\.\d) (\d?\d?:?\d\d:\d\d) (\d+) (\d+)/i, :method => :add_ride
-  def add_ride(m,miles,duration,elevation,power)
-    datetime = Time.now.to_i;
+  def add_ride(m,distance,duration,elevation,power)
+    time = Time.now.to_i;
 
     # Turn time into an interval in seconds
     duration = ChronicDuration.parse(duration).to_i
     
     synchronize(:track) do
-      @db.execute "INSERT INTO Cycling (Datetime,Miles,Duration,Elevation_gain,Power) VALUES (#{datetime},#{miles},#{duration},#{elevation},#{power})"
+      @db.execute "INSERT INTO Cycling (Time,Distance,Duration,Elevation,Power) VALUES (#{time},#{distance},#{duration},#{elevation},#{power})"
     end
 
-    delayed_reply(m,"Avg spd: #{(miles/duration)*3600} mph")
+    delayed_reply(m,"Avg spd: #{(distance/duration)*3600} mph")
   end
 end
