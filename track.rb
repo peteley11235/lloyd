@@ -47,8 +47,15 @@ class Track
   end
 
   ### Canfield
-  match /canfield (\d+)/i, :method => :add_canfield
-  def add_canfield(m,cards)
+  match /canfield (\d\d?) (\d+)/i, :method => :add_canfield
+  def add_canfield(m,foundation,cards)
+    foundation = foundation.to_i
+
+    unless (1..12).include? foundation
+      delayed_reply(m,"Card rank must be between 1 and 12.")
+      return
+    end
+
     cards = cards.to_i
     # Each card is worth $5, minus the initial buyin of $50. If you
     # win (get all cards) you get an automatic $500.
@@ -57,7 +64,7 @@ class Track
     # In this case, time != money
     time = Time.now.to_i
     synchronize(:track) do
-      @db.execute "INSERT INTO Canfield (Time,Money,Cards) VALUES (#{time},#{money},#{cards})"
+      @db.execute "INSERT INTO Canfield (Time,Money,Cards,Foundation) VALUES (#{time},#{money},#{cards},#{foundation})"
       @canfield_winnings += money
     end
     delayed_reply(m,"Added. Balance: $#{@canfield_winnings}")
@@ -71,6 +78,7 @@ class Track
   ### Go proverbs
   match /rec proverb (\'.+\')/i, :method => :rec_proverb
   def rec_proverb(m,proverb)
+
     synchronize(:track) do
       @db.execute "INSERT INTO Proverbs (Proverb) VALUES (#{proverb})"
     end
