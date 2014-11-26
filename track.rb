@@ -67,7 +67,6 @@ class Track
       @db.execute "INSERT INTO Canfield (Time,Money,Cards,Foundation) VALUES (#{time},#{money},#{cards},#{foundation})"
       @canfield_winnings += money
     end
-    delayed_reply(m,"Added. Balance: $#{@canfield_winnings}")
   end
 
   match /canfield bal/i, :method => :canfield_balance
