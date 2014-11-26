@@ -73,4 +73,12 @@ class Track
   def canfield_balance(m)
     delayed_reply(m,"Your winnings so far: $#{@canfield_winnings}")
   end
+
+  match /weight (\d+)/i, :method => :add_weight
+  def add_weight(m,weight)
+    time = Time.now.to_i
+    synchronize(:track) do
+      @db.execute "INSERT INTO Weight (Time,Weight) VALUES (#{time},#{weight})"
+    end
+  end
 end
