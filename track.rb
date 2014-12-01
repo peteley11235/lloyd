@@ -51,7 +51,7 @@ class Track
   def add_canfield(m,foundation,cards)
     foundation = foundation.to_i
 
-    unless (1..12).include? foundation
+    unless (1..13).include? foundation
       delayed_reply(m,"Card rank must be between 1 and 12.")
       return
     end
